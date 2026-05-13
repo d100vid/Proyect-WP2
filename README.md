@@ -1,25 +1,16 @@
+# Recipe Haven - Community Recipe Sharing Platform
+## Team members:
+    David Martin Sanz // dmartin@stud.fils.upb.ro
+    Ivan Pina Brox // ivan.pina@stud.fils.upb.ro
+## Site Description
+Recipe Haven is a full-stack web application built with Spring Boot that allows food enthusiasts to connect, share, and discover new recipes. The platform functions similarly to an e-commerce site, but instead of buying products, users explore and interact with user-generated culinary content. 
 
-  # Design Recipe Haven Home Screen
+The application supports distinct user roles (clients and admins) and utilizes Spring Security for robust authentication and session management. Registered users can create a personalized profile, upload recipe details along with images (resource uploading), and curate a list of favorite dishes. Administrators have special privileges to moderate the platform, manage user accounts, and oversee the published content to ensure quality. The frontend is fully responsive, ensuring a great experience across all devices, and the entire application is containerized using Docker for easy deployment.
 
-  This is a code bundle for Design Recipe Haven Home Screen. The original project is available at https://www.figma.com/design/HHpnOHqn5bNaSXd3wUTFUA/Design-Recipe-Haven-Home-Screen.
+## User Stories
 
-  ## Running the frontend
+* **As a home cook (registered user)**, I want to upload a new recipe with an attractive cover photo and step-by-step instructions so that I can share my culinary creations with the community.
+* **As a food enthusiast (registered user)**, I want to browse recipes and save my favorites to my personal profile so that I can quickly find them later when I am ready to cook.
+* **As a platform administrator**, I want to view a dashboard with all users and recipes so that I can delete inappropriate content or remove users who violate the community guidelines.
 
-  Run `npm i` to install the dependencies.
 
-  Run `npm run dev` to start the development server.
-
-  ## Running the backend and database
-
-  The backend uses Spring Boot with Maven and PostgreSQL in Docker.
-
-  1. Install Maven and Docker.
-  2. Run `docker compose up --build` from the project root.
-  3. The backend will be available at `http://localhost:8080`.
-  4. The PostgreSQL database will run on `localhost:5432` with credentials `projectapp/projectapp`.
-
-  Example API endpoints:
-
-  - `GET http://localhost:8080/api/users`
-  - `POST http://localhost:8080/api/users`
-  
