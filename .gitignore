@@ -1,0 +1,21 @@
+# Node
+node_modules/
+package-lock.json
+pnpm-lock.yaml
+.vite/
+
+# Maven
+backend/target/
+**/target/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Docker
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
