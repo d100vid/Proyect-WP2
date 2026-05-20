@@ -8,6 +8,7 @@ public class RecipeResponse {
     private String image;
     private String time;
     private String difficulty;
+    private String category;
     private Long userId;
     private boolean validated;
     private Long validatedBy;
@@ -73,6 +74,14 @@ public class RecipeResponse {
 
     public void setDifficulty(String difficulty) {
         this.difficulty = difficulty;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public Long getUserId() {

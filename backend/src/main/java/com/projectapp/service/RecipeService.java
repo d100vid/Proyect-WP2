@@ -18,30 +18,31 @@ public class RecipeService {
         this.recipeRepository = recipeRepository;
     }
 
-    // Crear nueva receta (no validada por defecto)
-    @Transactional
-    public Recipe createRecipe(CreateRecipeRequest request, Long userId, String imageBase64) throws Exception {
-        // Validar campos requeridos
-        if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
-            throw new Exception("Recipe title is required");
-        }
+     // Crear nueva receta (no validada por defecto)
+     @Transactional
+     public Recipe createRecipe(CreateRecipeRequest request, Long userId, String imageBase64) throws Exception {
+         // Validar campos requeridos
+         if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
+             throw new Exception("Recipe title is required");
+         }
 
-        Recipe recipe = new Recipe();
-        recipe.setTitle(request.getTitle());
-        recipe.setTime(request.getTime());
-        recipe.setDifficulty(request.getDifficulty());
-        recipe.setImage(imageBase64);
-        recipe.setIngredients(request.getIngredients());
-        recipe.setInstructions(request.getInstructions());
-        recipe.setUserId(userId);
-        recipe.setValidated(false); // Por defecto, no validada
-        recipe.setCreatedAt(LocalDateTime.now());
-        recipe.setQuick(request.isQuick());
-        recipe.setHealthy(request.isHealthy());
-        recipe.setHasFewIngredients(request.isHasFewIngredients());
+         Recipe recipe = new Recipe();
+         recipe.setTitle(request.getTitle());
+         recipe.setTime(request.getTime());
+         recipe.setDifficulty(request.getDifficulty());
+         recipe.setCategory(request.getCategory());
+         recipe.setImage(imageBase64);
+         recipe.setIngredients(request.getIngredients());
+         recipe.setInstructions(request.getInstructions());
+         recipe.setUserId(userId);
+         recipe.setValidated(false); // Por defecto, no validada
+         recipe.setCreatedAt(LocalDateTime.now());
+         recipe.setQuick(request.isQuick());
+         recipe.setHealthy(request.isHealthy());
+         recipe.setHasFewIngredients(request.isHasFewIngredients());
 
-        return recipeRepository.save(recipe);
-    }
+         return recipeRepository.save(recipe);
+     }
 
     // Obtener todas las recetas validadas (para usuarios normales)
     public List<Recipe> getValidatedRecipes() {
@@ -83,34 +84,43 @@ public class RecipeService {
             .orElseThrow(() -> new Exception("Recipe not found"));
     }
 
-    // Convertir a DTO
-    public RecipeResponse toDTO(Recipe recipe) {
-        RecipeResponse response = new RecipeResponse();
-        response.setId(recipe.getId());
-        response.setTitle(recipe.getTitle());
-        response.setImage(recipe.getImage());
-        response.setTime(recipe.getTime());
-        response.setDifficulty(recipe.getDifficulty());
-        response.setUserId(recipe.getUserId());
-        response.setValidated(recipe.isValidated());
-        response.setValidatedBy(recipe.getValidatedBy());
-        response.setCreatedAt(recipe.getCreatedAt());
-        response.setValidatedAt(recipe.getValidatedAt());
-        response.setIngredients(recipe.getIngredients());
-        response.setInstructions(recipe.getInstructions());
-        response.setQuick(recipe.isQuick());
-        response.setHealthy(recipe.isHealthy());
-        response.setHasFewIngredients(recipe.isHasFewIngredients());
-        return response;
-    }
+     // Convertir a DTO
+     public RecipeResponse toDTO(Recipe recipe) {
+         RecipeResponse response = new RecipeResponse();
+         response.setId(recipe.getId());
+         response.setTitle(recipe.getTitle());
+         response.setImage(recipe.getImage());
+         response.setTime(recipe.getTime());
+         response.setDifficulty(recipe.getDifficulty());
+         response.setCategory(recipe.getCategory());
+         response.setUserId(recipe.getUserId());
+         response.setValidated(recipe.isValidated());
+         response.setValidatedBy(recipe.getValidatedBy());
+         response.setCreatedAt(recipe.getCreatedAt());
+         response.setValidatedAt(recipe.getValidatedAt());
+         response.setIngredients(recipe.getIngredients());
+         response.setInstructions(recipe.getInstructions());
+         response.setQuick(recipe.isQuick());
+         response.setHealthy(recipe.isHealthy());
+         response.setHasFewIngredients(recipe.isHasFewIngredients());
+         return response;
+     }
 
     public List<RecipeResponse> toDTOList(List<Recipe> recipes) {
         return recipes.stream().map(this::toDTO).collect(Collectors.toList());
     }
 
-    // Obtener recetas por usuario (incluye pendientes y validadas)
-    public List<Recipe> getRecipesByUser(Long userId) {
-        return recipeRepository.findByUserId(userId);
-    }
+     // Obtener recetas por usuario (incluye pendientes y validadas)
+     public List<Recipe> getRecipesByUser(Long userId) {
+         return recipeRepository.findByUserId(userId);
+     }
+
+     // Eliminar receta (solo para admins)
+     @Transactional
+     public void deleteRecipe(Long recipeId) throws Exception {
+         Recipe recipe = recipeRepository.findById(recipeId)
+             .orElseThrow(() -> new Exception("Recipe not found"));
+         recipeRepository.deleteById(recipeId);
+     }
 }
 

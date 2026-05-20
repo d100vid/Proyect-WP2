@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { ApiService } from '../../services/api';
-import { Search, Plus, LogOut } from 'lucide-react';
+import { Search, Plus, LogOut, Shield } from 'lucide-react';
 import { RecipeCard } from '../components/RecipeCard';
 import { FilterChip } from '../components/FilterChip';
 import { AddRecipeModal } from '../components/AddRecipeModal';
@@ -190,24 +190,35 @@ export function Home() {
           {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Sign In Button - Top Right */}
-          <div className="flex justify-between items-center mb-4">
-            <div className="text-slate-700 font-medium">
-              {user && `Welcome, ${user.name}!`}
-            </div>
-            {user && user.role === 'Admin' && pendingCount > 0 && (
-              <div className="flex items-center gap-3">
-                <a href="/admin" className="px-3 py-2 bg-yellow-500 text-white rounded-lg">{pendingCount} pending</a>
-              </div>
-            )}
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl hover:from-red-600 hover:to-pink-600 transition-all shadow-md hover:shadow-lg"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="font-medium">Sign Out</span>
-            </button>
-          </div>
+           {/* Sign In Button - Top Right */}
+           <div className="flex justify-between items-center mb-4">
+             <div className="text-slate-700 font-medium">
+               {user && `Welcome, ${user.name}!`}
+             </div>
+             <div className="flex items-center gap-3">
+               {user && user.role === 'Admin' && (
+                 <Link
+                   to="/admin"
+                   className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-all"
+                 >
+                   <Shield className="w-4 h-4" />
+                   <span className="font-medium">Admin Panel</span>
+                 </Link>
+               )}
+               {user && user.role === 'Admin' && pendingCount > 0 && (
+                 <span className="px-3 py-2 bg-yellow-500 text-white rounded-lg text-sm font-medium">
+                   {pendingCount} pending
+                 </span>
+               )}
+               <button
+                 onClick={handleLogout}
+                 className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl hover:from-red-600 hover:to-pink-600 transition-all shadow-md hover:shadow-lg"
+               >
+                 <LogOut className="w-4 h-4" />
+                 <span className="font-medium">Sign Out</span>
+               </button>
+             </div>
+           </div>
 
           <h1 className="text-center bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-8 text-4xl">
             Recipe Haven

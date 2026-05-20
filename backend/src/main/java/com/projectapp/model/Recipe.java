@@ -20,6 +20,8 @@ public class Recipe {
 
     private String difficulty; // Easy, Medium, Hard
 
+    private String category; // Seafood, Pasta, Chicken, etc.
+
     private Long userId; // Usuario que creó la receta
 
     private boolean validated; // Si fue validada por admin
@@ -82,6 +84,14 @@ public class Recipe {
 
     public void setDifficulty(String difficulty) {
         this.difficulty = difficulty;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public Long getUserId() {

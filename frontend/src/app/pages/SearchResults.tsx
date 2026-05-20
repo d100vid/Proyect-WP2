@@ -159,9 +159,9 @@ export function SearchResults() {
           title: r.title,
           image: r.image || '',
           time: r.time || '',
-          difficulty: r.difficulty || 'Easy',
+          difficulty: (r.difficulty || 'Easy') as 'Easy' | 'Medium' | 'Hard',
           category: r.category || 'Other',
-          timeInMinutes: parseInt(r.time) || 30
+          timeInMinutes: parseInt(String(r.time).match(/\d+/)?.[0] || '30') || 30
         }));
       setUserRecipes(validRecipes);
     } catch (err) {

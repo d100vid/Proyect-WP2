@@ -37,6 +37,7 @@ public class RecipeController {
             @RequestParam("title") String title,
             @RequestParam("time") String time,
             @RequestParam("difficulty") String difficulty,
+            @RequestParam("category") String category,
             @RequestParam("ingredients") String ingredients,
             @RequestParam("instructions") String instructions,
             @RequestParam("isQuick") boolean isQuick,
@@ -66,6 +67,7 @@ public class RecipeController {
             request.setTitle(title);
             request.setTime(time);
             request.setDifficulty(difficulty);
+            request.setCategory(category);
             request.setIngredients(ingredients);
             request.setInstructions(instructions);
             request.setQuick(isQuick);
@@ -188,15 +190,46 @@ public class RecipeController {
         }
     }
 
-    // Obtener receta por ID
-    @GetMapping("/{id}")
-    public ResponseEntity<RecipeResponse> getRecipeById(@PathVariable Long id) {
-        try {
-            Recipe recipe = recipeService.getRecipeById(id);
-            return ResponseEntity.ok(recipeService.toDTO(recipe));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-    }
+     // Obtener receta por ID
+     @GetMapping("/{id}")
+     public ResponseEntity<RecipeResponse> getRecipeById(@PathVariable Long id) {
+         try {
+             Recipe recipe = recipeService.getRecipeById(id);
+             return ResponseEntity.ok(recipeService.toDTO(recipe));
+         } catch (Exception e) {
+             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+         }
+     }
+
+     // Eliminar receta (solo para admins)
+     @DeleteMapping("/{id}")
+     public ResponseEntity<Map<String, Object>> deleteRecipe(
+             @PathVariable Long id,
+             @RequestParam(value = "adminId", required = false) Long adminId) {
+         try {
+             // Verificar que es admin (si se proporciona adminId)
+             if (adminId != null) {
+                 Optional<User> adminOpt = userRepository.findById(adminId);
+                 if (adminOpt.isEmpty() || !adminOpt.get().getRole().equals("Admin")) {
+                     Map<String, Object> response = new HashMap<>();
+                     response.put("success", false);
+                     response.put("message", "Only admins can delete recipes");
+                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+                 }
+             }
+
+             recipeService.deleteRecipe(id);
+             
+             Map<String, Object> response = new HashMap<>();
+             response.put("success", true);
+             response.put("message", "Recipe deleted successfully");
+             return ResponseEntity.ok(response);
+         } catch (Exception e) {
+             Map<String, Object> response = new HashMap<>();
+             response.put("success", false);
+             response.put("message", e.getMessage());
+             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+         }
+     }
 }
 

@@ -4,6 +4,7 @@ public class CreateRecipeRequest {
     private String title;
     private String time;
     private String difficulty;
+    private String category;
     private String ingredients;
     private String instructions;
     private boolean isQuick;
@@ -35,6 +36,14 @@ public class CreateRecipeRequest {
 
     public void setDifficulty(String difficulty) {
         this.difficulty = difficulty;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public String getIngredients() {
