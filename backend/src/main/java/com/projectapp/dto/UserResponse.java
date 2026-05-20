@@ -1,29 +1,18 @@
-package com.projectapp.model;
+package com.projectapp.dto;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
-@Entity
-@Table(name = "users")
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class UserResponse {
     private Long id;
     private String name;
     private String email;
-    private String password;
     private String role;
 
-    public User() {
+    public UserResponse() {
     }
 
-    public User(String name, String email, String password, String role) {
+    public UserResponse(Long id, String name, String email, String role) {
+        this.id = id;
         this.name = name;
         this.email = email;
-        this.password = password;
         this.role = role;
     }
 
@@ -51,14 +40,6 @@ public class User {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getRole() {
         return role;
     }
@@ -67,3 +48,4 @@ public class User {
         this.role = role;
     }
 }
+

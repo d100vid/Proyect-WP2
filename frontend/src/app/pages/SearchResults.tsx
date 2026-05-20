@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router';
 import { Search, SlidersHorizontal, X, Clock, ChefHat } from 'lucide-react';
 import { RecipeCard } from '../components/RecipeCard';
+import { ApiService } from '../../services/api';
 
 interface Recipe {
   id: number;
@@ -130,6 +131,7 @@ export function SearchResults() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [showFilters, setShowFilters] = useState(false);
+  const [userRecipes, setUserRecipes] = useState<Recipe[]>([]);
   
   // Filter states
   const [selectedDifficulty, setSelectedDifficulty] = useState<string[]>([]);
@@ -138,13 +140,45 @@ export function SearchResults() {
   
   const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
 
+  // Load user's recipes
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      loadUserRecipes(userData.id);
+    }
+  }, []);
+
+  const loadUserRecipes = async (userId: number) => {
+    try {
+      const recipes = await ApiService.getRecipesByUser(userId);
+      const validRecipes = (recipes as any[])
+        .filter(r => r.validated)
+        .map(r => ({
+          id: r.id,
+          title: r.title,
+          image: r.image || '',
+          time: r.time || '',
+          difficulty: r.difficulty || 'Easy',
+          category: r.category || 'Other',
+          timeInMinutes: parseInt(r.time) || 30
+        }));
+      setUserRecipes(validRecipes);
+    } catch (err) {
+      console.error('Error loading user recipes', err);
+    }
+  };
+
+  // Combine all recipes (default + user recipes)
+  const allRecipesWithUser = [...allRecipes, ...userRecipes];
+
   // Categories disponibles
   const categories = ['Seafood', 'Pasta', 'Chicken', 'Vegetarian', 'Salads', 'Breakfast', 'Mexican', 'Beef', 'Italian', 'Thai'];
   const difficulties = ['Easy', 'Medium', 'Hard'];
 
   useEffect(() => {
     // Aplicar filtros
-    let results = allRecipes.filter(recipe => {
+    let results = allRecipesWithUser.filter(recipe => {
       const matchesSearch = recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            recipe.category.toLowerCase().includes(searchQuery.toLowerCase());
       
@@ -160,7 +194,7 @@ export function SearchResults() {
     });
 
     setFilteredRecipes(results);
-  }, [searchQuery, selectedDifficulty, selectedCategories, maxTime]);
+  }, [searchQuery, selectedDifficulty, selectedCategories, maxTime, userRecipes]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

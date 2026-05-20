@@ -1,18 +1,37 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router';
 import { ChefHat, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { ApiService } from '../../services/api';
 
 export function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí iría la lógica de autenticación
-    // Por ahora solo navegamos a home
-    navigate('/home');
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await ApiService.login({ email, password });
+
+      if (response.success) {
+        // Guardar usuario en localStorage
+        localStorage.setItem('user', JSON.stringify(response.user));
+        navigate('/home');
+      } else {
+        setError(response.message || 'Login failed');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Connection error. Please make sure the backend is running.');
+      console.error('Login error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -38,6 +57,13 @@ export function Login() {
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm border border-red-200">
+                {error}
+              </div>
+            )}
+
             {/* Email Input */}
             <div>
               <label className="block text-slate-700 font-medium mb-2">
@@ -94,9 +120,10 @@ export function Login() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full py-3 bg-gradient-to-r from-violet-500 to-indigo-500 text-white rounded-xl hover:from-violet-600 hover:to-indigo-600 transition-all shadow-lg shadow-violet-500/30 font-medium"
+              disabled={loading}
+              className="w-full py-3 bg-gradient-to-r from-violet-500 to-indigo-500 text-white rounded-xl hover:from-violet-600 hover:to-indigo-600 transition-all shadow-lg shadow-violet-500/30 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
+              {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 

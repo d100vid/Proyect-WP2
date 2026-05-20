@@ -4,6 +4,7 @@ import { SignUp } from "./pages/SignUp";
 import { Home } from "./pages/Home";
 import { RecipeDetail } from "./pages/RecipeDetail";
 import { SearchResults } from "./pages/SearchResults";
+import { AdminDashboard } from "./pages/AdminDashboard";
 
 export const router = createBrowserRouter([
   {
@@ -25,5 +26,9 @@ export const router = createBrowserRouter([
   {
     path: "/recipe/:id",
     Component: RecipeDetail,
+  },
+  {
+    path: "/admin",
+    Component: AdminDashboard,
   },
 ]);

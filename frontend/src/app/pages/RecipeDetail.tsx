@@ -1,93 +1,76 @@
 import { useParams, Link } from 'react-router';
 import { Clock, Users, ChefHat, ArrowLeft, Heart } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ApiService } from '../../services/api';
 
-// Mock data - en una app real esto vendría de una API
-const recipeData: { [key: string]: any } = {
+// Fallback mock data for demo when API has no data
+const fallbackData: { [key: string]: any } = {
   '1': {
     title: 'Grilled Salmon with Lemon Butter',
-    image: 'https://images.unsplash.com/photo-1768482303665-ed751d06af5f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoZWFsdGh5JTIwc2FsbW9uJTIwZGlzaHxlbnwxfHx8fDE3NzU2Njk2MjJ8MA&ixlib=rb-4.1.0&q=80&w=1080',
+    image: 'https://images.unsplash.com/photo-1768482303665-ed751d06af5f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
     time: '25 min',
     difficulty: 'Medium',
     servings: 4,
     description: 'A delicious and healthy grilled salmon with a rich lemon butter sauce. Perfect for a special dinner or a nutritious weeknight meal.',
-    ingredients: [
-      '4 salmon fillets (6 oz each)',
-      '4 tbsp unsalted butter',
-      '2 lemons (juice and zest)',
-      '3 cloves garlic, minced',
-      '2 tbsp fresh parsley, chopped',
-      'Salt and pepper to taste',
-      '2 tbsp olive oil',
-      '1 tsp paprika'
-    ],
-    materials: [
-      'Grill or grill pan',
-      'Mixing bowl',
-      'Small saucepan',
-      'Basting brush',
-      'Tongs',
-      'Cutting board',
-      'Sharp knife'
-    ],
-    instructions: [
-      'Pat the salmon fillets dry with paper towels and season both sides with salt, pepper, and paprika.',
-      'Preheat your grill to medium-high heat and brush with olive oil to prevent sticking.',
-      'In a small saucepan, melt the butter over medium heat. Add minced garlic and cook for 1-2 minutes until fragrant.',
-      'Add lemon juice and zest to the butter mixture. Stir in fresh parsley and keep warm.',
-      'Place salmon fillets on the grill, skin-side down. Grill for 4-5 minutes without moving.',
-      'Carefully flip the salmon and grill for another 3-4 minutes until cooked through.',
-      'Remove from grill and immediately drizzle with the lemon butter sauce.',
-      'Serve hot with your favorite vegetables or rice. Enjoy!'
-    ]
-  },
-  '2': {
-    title: 'Classic Creamy Carbonara',
-    image: 'https://images.unsplash.com/photo-1574885014162-92e4f12928db?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwYXN0YSUyMGNhcmJvbmFyYSUyMGZvb2R8ZW58MXx8fHwxNzc1NjY5NjIyfDA&ixlib=rb-4.1.0&q=80&w=1080',
-    time: '20 min',
-    difficulty: 'Easy',
-    servings: 4,
-    description: 'An authentic Italian carbonara with a silky, creamy sauce made with eggs, cheese, and crispy pancetta.',
-    ingredients: [
-      '400g spaghetti',
-      '200g pancetta or guanciale, diced',
-      '4 large egg yolks',
-      '1 whole egg',
-      '100g Pecorino Romano, grated',
-      '50g Parmesan cheese, grated',
-      'Black pepper, freshly ground',
-      'Salt for pasta water'
-    ],
-    materials: [
-      'Large pot for pasta',
-      'Large skillet or pan',
-      'Mixing bowl',
-      'Whisk',
-      'Tongs or pasta fork',
-      'Grater',
-      'Colander'
-    ],
-    instructions: [
-      'Bring a large pot of salted water to boil. Cook spaghetti according to package directions until al dente.',
-      'While pasta cooks, heat a large skillet over medium heat. Add diced pancetta and cook until crispy, about 5-7 minutes.',
-      'In a mixing bowl, whisk together egg yolks, whole egg, both cheeses, and plenty of black pepper.',
-      'Reserve 1 cup of pasta cooking water before draining. Drain the pasta.',
-      'Remove skillet from heat. Add hot pasta to the pancetta and toss to combine.',
-      'Quickly add the egg mixture to the pasta, tossing constantly. Add reserved pasta water gradually to create a creamy sauce.',
-      'The heat from the pasta will cook the eggs gently. Keep tossing until creamy and glossy.',
-      'Serve immediately with extra cheese and black pepper on top.'
-    ]
+    ingredients: ['4 salmon fillets (6 oz each)', '4 tbsp unsalted butter', '2 lemons (juice and zest)'],
+    materials: ['Grill or grill pan', 'Mixing bowl'],
+    instructions: ['Preheat grill', 'Cook salmon']
   }
 };
 
 export function RecipeDetail() {
   const { id } = useParams();
-  const recipe = recipeData[id || '1'] || recipeData['1'];
+  const [loading, setLoading] = useState(true);
+  const [recipe, setRecipe] = useState<any>(null);
 
+  useEffect(() => {
+    let mounted = true;
+    const fetchRecipe = async () => {
+      setLoading(true);
+      try {
+        if (id) {
+          const data: any = await ApiService.getRecipeById(Number(id));
+          if (mounted && data) {
+            // normalize fields: ingredients/instructions may be stored as newline text
+            const ingredients = typeof data.ingredients === 'string' ? data.ingredients.split(/\r?\n/).filter(Boolean) : (data.ingredients || []);
+            const instructions = typeof data.instructions === 'string' ? data.instructions.split(/\r?\n/).filter(Boolean) : (data.instructions || []);
+            setRecipe({
+              title: data.title || 'Recipe',
+              image: data.image || '',
+              time: data.time || '',
+              difficulty: data.difficulty || 'Easy',
+              servings: data.servings || 1,
+              description: data.title || '',
+              ingredients,
+              materials: [],
+              instructions,
+            });
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('Error fetching recipe by id', e);
+      }
+      // fallback to mock
+      setRecipe(fallbackData[id || '1'] || fallbackData['1']);
+      setLoading(false);
+    };
+
+    fetchRecipe();
+    return () => { mounted = false; };
+  }, [id]);
+
+  if (loading || !recipe) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
+
+  const diffKey = (recipe.difficulty as 'Easy' | 'Medium' | 'Hard') || 'Easy';
   const difficultyColor = {
     Easy: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
     Medium: 'bg-amber-50 text-amber-600 border border-amber-100',
     Hard: 'bg-rose-50 text-rose-600 border border-rose-100'
-  }[recipe.difficulty];
+  }[diffKey];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-blue-50 to-teal-50">
@@ -172,7 +155,7 @@ export function RecipeDetail() {
               Materials & Equipment
             </h3>
             <ul className="space-y-3">
-              {recipe.materials.map((material: string, index: number) => (
+              {(recipe.materials || []).map((material: string, index: number) => (
                 <li key={index} className="flex items-start gap-3 text-slate-600">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0"></span>
                   <span>{material}</span>

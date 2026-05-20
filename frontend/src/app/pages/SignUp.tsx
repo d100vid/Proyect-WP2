@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router';
 import { ChefHat, Mail, Lock, Eye, EyeOff, User, Shield } from 'lucide-react';
+import { ApiService } from '../../services/api';
 
 export function SignUp() {
   const [name, setName] = useState('');
@@ -10,21 +11,48 @@ export function SignUp() {
   const [role, setRole] = useState<'User' | 'Admin'>('User');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setError('');
+
     // Validación básica de contraseñas
     if (password !== confirmPassword) {
-      alert('Passwords do not match!');
+      setError('Passwords do not match!');
       return;
     }
-    
-    // Aquí iría la lógica de registro con el rol seleccionado
-    console.log('Register with role:', role);
-    // Por ahora solo navegamos a home
-    navigate('/home');
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    if (!name.trim()) {
+      setError('Name is required');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await ApiService.signup({ name, email, password, role });
+
+      if (response.success) {
+        // Guardar usuario en localStorage
+        localStorage.setItem('user', JSON.stringify(response.user));
+        navigate('/home');
+      } else {
+        setError(response.message || 'Registration failed');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Connection error. Please make sure the backend is running.');
+      console.error('Signup error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -50,6 +78,13 @@ export function SignUp() {
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm border border-red-200">
+                {error}
+              </div>
+            )}
+
             {/* Role Selection */}
             <div>
               <label className="block text-slate-700 font-medium mb-3">
@@ -175,9 +210,10 @@ export function SignUp() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full py-3 bg-gradient-to-r from-violet-500 to-indigo-500 text-white rounded-xl hover:from-violet-600 hover:to-indigo-600 transition-all shadow-lg shadow-violet-500/30 font-medium mt-6"
+              disabled={loading}
+              className="w-full py-3 bg-gradient-to-r from-violet-500 to-indigo-500 text-white rounded-xl hover:from-violet-600 hover:to-indigo-600 transition-all shadow-lg shadow-violet-500/30 font-medium mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Account as {role}
+              {loading ? 'Creating Account...' : `Create Account as ${role}`}
             </button>
           </form>
 
